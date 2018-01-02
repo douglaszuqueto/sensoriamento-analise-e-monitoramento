@@ -1,4 +1,4 @@
-/************************* Inclusão das Bibliotecas *************************/
+/************************** Inclusão das Bibliotecas **************************/
 
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -6,23 +6,23 @@
 #include <Wire.h>
 #include "Adafruit_MCP9808.h"
 
-/****************************** Conexão WiFi *********************************/
+/********************************** WiFi **************************************/
 
 #include "user_config.h"
 #include "user_config_override.h"
 
-/****************************** Broker MQTT **********************************/
+/******************************* Broker MQTT **********************************/
 
 const char* BROKER_MQTT = "192.168.0.20";
 int BROKER_PORT         = 1883;
 
-/*************************** Variaveis globais *******************************/
+/**************************** Variaveis globais *******************************/
 
 unsigned long previousMillis = 0;
 char temp[4];
 const char* MQTT_TOPIC_SENSOR = "douglaszuqueto/casa_01/cozinha/sensor_01";
 
-/************************ Declaração dos Prototypes **************************/
+/************************* Declaração dos Prototypes **************************/
 
 void initSerial();
 void initWiFi();
@@ -31,13 +31,13 @@ void initMCP9808();
 void readTemperature();
 void sendTemperature();
 
-/************************ Instanciação dos objetos  **************************/
+/************************* Instanciação dos objetos  **************************/
 
 Adafruit_MCP9808 mcp9808 = Adafruit_MCP9808();
 WiFiClient client;
 PubSubClient mqtt(client);
 
-/********************************* Sketch ************************************/
+/********************************** Sketch ************************************/
 
 void setup() {
   initSerial();
