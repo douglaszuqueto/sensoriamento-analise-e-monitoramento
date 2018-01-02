@@ -1,32 +1,29 @@
 /************************* Inclusão das Bibliotecas *************************/
 
 #include <ESP8266WiFi.h>
-#include <PubSubClient.h>
+#include <ESP8266HTTPClient.h>
 
 #include <Wire.h>
 #include "Adafruit_MCP9808.h"
 
 /****************************** Conexão WiFi *********************************/
 
-#include "user_config.h"
-#include "user_config_override.h"
+const char* SSID      = "homewifi_D68";
+const char* PASSWORD  = "09114147";
 
-/****************************** Broker MQTT **********************************/
+/****************************** WebService **********************************/
 
-const char* BROKER_MQTT = "192.168.0.20";
-int BROKER_PORT         = 1883;
+String BASE_URL = "http://192.168.0.20:3000/";
 
 /*************************** Variaveis globais *******************************/
 
 unsigned long previousMillis = 0;
 char temp[4];
-const char* MQTT_TOPIC_SENSOR = "douglaszuqueto/casa_01/cozinha/sensor_01";
 
 /************************ Declaração dos Prototypes **************************/
 
 void initSerial();
 void initWiFi();
-void initMQTT();
 void initMCP9808();
 void readTemperature();
 void sendTemperature();
@@ -35,26 +32,19 @@ void sendTemperature();
 
 Adafruit_MCP9808 mcp9808 = Adafruit_MCP9808();
 WiFiClient client;
-PubSubClient mqtt(client);
+HTTPClient http;
 
 /********************************* Sketch ************************************/
 
 void setup() {
   initSerial();
   initWiFi();
-  initMQTT();
   initMCP9808();
 }
 
 void loop() {
-  if (!mqtt.connected()) {
-    reconnectMQTT();
-  }
-
   recconectWiFi();
-  mqtt.loop();
   sensorLoop();
-
 }
 
 /*********************** Implementação dos Prototypes *************************/
@@ -70,14 +60,37 @@ void readTemperature()
 
 void sendTemperature()
 {
-  mqtt.publish(MQTT_TOPIC_SENSOR, temp);
-  Serial.println("[SENSOR] Temperatura: " + String(temp));
+  http.begin(BASE_URL + "/sensor");
+  http.addHeader("content-type", "application/x-www-form-urlencoded");
+
+  String body = "";
+  body += "id=";
+  body += "01";
+  body += "value=";
+  body += temp;
+
+  int httpCode = http.POST(body);
+
+  if (httpCode < 0) {
+    Serial.println("request error - " + httpCode);
+    return;
+  }
+
+  if (httpCode != HTTP_CODE_OK) {
+    Serial.println("request error - " + httpCode);
+    return;
+  }
+
+  String response =  http.getString();
+  Serial.println("response - " + response);
+
+  http.end();
 }
 
 /* Função responsável por publicar a cada X segundos o valor do sensor */
 void sensorLoop() {
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis > 1000 && mqtt.connected()) {
+  if (currentMillis - previousMillis > 1000) {
     previousMillis = currentMillis;
 
     readTemperature();
@@ -93,52 +106,27 @@ void initSerial() {
 /* Configuração da conexão WiFi */
 void initWiFi() {
   delay(10);
-  Serial.print("[WIFI] Conectando-se em " + String(WIFI_SSID));
+  Serial.println("Conectando-se em: " + String(SSID));
 
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
+  WiFi.begin(SSID, PASSWORD);
   while (WiFi.status() != WL_CONNECTED) {
     delay(100);
     Serial.print(".");
   }
-
   Serial.println();
-  Serial.println("[WIFI] SSID: " + String(WIFI_SSID));
-  Serial.print("[WIFI] IP: ");
+  Serial.print("Conectado na Rede " + String(SSID) + " | IP => ");
   Serial.println(WiFi.localIP());
-  Serial.print("[WIFI] Mac: ");
-  Serial.println(WiFi.macAddress());
-  Serial.println("");
-}
-
-/* Configuração da conexão MQTT */
-void initMQTT() {
-  mqtt.setServer(BROKER_MQTT, BROKER_PORT);
 }
 
 /* Inicialização do Sensor */
 void initMCP9808() {
   if (!mcp9808.begin()) {
-    Serial.println("[SENSOR] MCP9808 não pode ser iniciado!");
+    Serial.println("Sensor MCP não pode ser iniciado!");
     while (1);
   }
 }
 
 /* Demais implementações */
-
-void reconnectMQTT() {
-  while (!mqtt.connected()) {
-    Serial.println("[BROKER] Tentando se conectar ao Broker MQTT: " + String(BROKER_MQTT));
-    if (mqtt.connect("sensor_01")) {
-      Serial.println("[BROKER] Conectado");
-    } else {
-      Serial.println("[BROKER] Falha ao Reconectar");
-      Serial.println("[BROKER] Tentando se reconectar em 2 segundos");
-      delay(2000);
-    }
-  }
-  Serial.println("");
-}
 
 void recconectWiFi() {
   while (WiFi.status() != WL_CONNECTED) {
