@@ -4,15 +4,20 @@
     "stage-0"
   ],
   "plugins": [
-    ["transform-flow-strip-types"],
     [
-      "module-resolver", {
-      "root": ["./src"],
-      "alias": {
-        "instreets": "./src",
-        "sdk": "../sdk/build/main"
+      "transform-flow-strip-types"
+    ],
+    [
+      "module-resolver",
+      {
+        "root": [
+          "./src"
+        ],
+        "alias": {
+          "instreets": "./src",
+          "sdk": "../sdk/build/main"
+        }
       }
-    }
     ]
   ]
 }
