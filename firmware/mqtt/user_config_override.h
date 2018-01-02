@@ -2,6 +2,6 @@
 #define _USER_CONFIG_OVERRIDE_H_
 
 #define WIFI_SSID     "Zuqueto"
-#define WIFI_PASSWORD "Dlx#wifi8594"
+#define WIFI_PASSWORD ""
 
 #endif
