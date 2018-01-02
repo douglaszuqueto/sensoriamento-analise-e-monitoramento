@@ -20,7 +20,7 @@ int BROKER_PORT         = 1883;
 
 unsigned long previousMillis = 0;
 char temp[4];
-const char* MQTT_TOPIC_SENSOR = "douglaszuqueto/casa_01/cozinha/sensor_01";
+const char* MQTT_TOPIC_SENSOR = "douglaszuqueto/casa_01/cozinha/temperatura/sensor_01";
 
 /************************* Declaração dos Prototypes **************************/
 
