@@ -106,6 +106,8 @@ void initWiFi() {
   Serial.println("[WIFI] SSID: " + String(SSID));
   Serial.print("[WIFI] IP: ");
   Serial.println(WiFi.localIP());
+  Serial.print("[WIFI] Mac: ");
+  Serial.println(WiFi.macAddress());
   Serial.println("");
 }
 
