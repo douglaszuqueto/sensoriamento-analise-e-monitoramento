@@ -51,8 +51,16 @@ void loop() {
     reconnectMQTT();
   }
 
+  yield();
+
   recconectWiFi();
+
+  yield();
+
   mqtt.loop();
+
+  yield();
+
   sensorLoop();
 
 }
@@ -77,7 +85,7 @@ void sendTemperature()
 /* Função responsável por publicar a cada X segundos o valor do sensor */
 void sensorLoop() {
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis > 1000 && mqtt.connected()) {
+  if (currentMillis - previousMillis > 5000 && mqtt.connected()) {
     previousMillis = currentMillis;
 
     readTemperature();
@@ -98,7 +106,7 @@ void initWiFi() {
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
+    delay(500);
     Serial.print(".");
   }
 
@@ -127,22 +135,26 @@ void initMCP9808() {
 /* Demais implementações */
 
 void reconnectMQTT() {
-  while (!mqtt.connected()) {
+  if (!mqtt.connected()) {
     Serial.println("[BROKER] Tentando se conectar ao Broker MQTT: " + String(BROKER_MQTT));
-    if (mqtt.connect("sensor_01")) {
-      Serial.println("[BROKER] Conectado");
-    } else {
-      Serial.println("[BROKER] Falha ao Reconectar");
-      Serial.println("[BROKER] Tentando se reconectar em 2 segundos");
-      delay(2000);
+
+    while (!mqtt.connected()) {
+      if (mqtt.connect("sensor_01")) {
+        Serial.println("");
+        Serial.println("[BROKER] Conectado");
+      } else {
+        Serial.print(".");
+        delay(500);
+      }
     }
   }
+  
   Serial.println("");
 }
 
 void recconectWiFi() {
   while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
+    delay(500);
     Serial.print(".");
   }
 }
