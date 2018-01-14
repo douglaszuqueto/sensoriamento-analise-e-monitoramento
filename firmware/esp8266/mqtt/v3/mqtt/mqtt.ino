@@ -142,7 +142,9 @@ void sendData()
 
   String payload;
   payload += "{";
-  payload += "\"t\":";
+  payload += "\"id\":";
+  payload += ESP.getChipId();
+  payload += ",\"t\":";
   payload += temp;
   payload += ",\"h\":";
   payload += humi;
@@ -150,7 +152,7 @@ void sendData()
 
   payload.toCharArray(sensorPayload, 100);
   mqtt.publish(MQTT_TOPIC_SENSOR, sensorPayload);
-  DEBUG_PRINTLN("[SENSOR] Temperatura: " + String(sensorPayload));
+  DEBUG_PRINTLN("[SENSOR] " + String(sensorPayload));
 }
 
 /* Função responsável por publicar a cada X segundos o valor do sensor */
@@ -172,12 +174,12 @@ void statisticsLoop() {
 
     String payload;
     payload += "{";
-    payload += "\"vcc\":";
+    payload += "\"id\":";
+    payload += ESP.getChipId();
+    payload += ",\"vcc\":";
     payload += ESP.getVcc() / 1024.00f;
     payload += ",\"memory\":";
     payload += ESP.getFreeHeap();
-    payload += ",\"chip_id\":";
-    payload += ESP.getChipId();
     payload += ",\"uptime\":";
     payload += millis();
     payload += ",\"boot_count\":";
