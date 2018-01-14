@@ -23,4 +23,8 @@ const char* MQTT_TOPIC_STATISTICS = "douglaszuqueto/casa_01/cozinha/temperatura/
 const long sensor_interval      = 5000;
 const long statistics_interval  = 10000;
 
+/* SENSOR */
+
+#define DHT_SENSOR
+
 #endif

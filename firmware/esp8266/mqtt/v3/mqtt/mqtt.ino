@@ -4,13 +4,19 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-#include <Wire.h>
-#include "Adafruit_MCP9808.h"
-
 /****************************** User Config ***********************************/
 
 #include "user_config.h"
 #include "user_config_override.h"
+
+#ifdef MCP9808_SENSOR
+
+#include <Wire.h>
+#include "Adafruit_MCP9808.h"
+
+#else
+#include "DHT.h"
+#endif
 
 /**************************** DEBUG *******************************/
 
@@ -35,8 +41,11 @@ unsigned long statisticsPreviousMillis  = 0;
 
 uint8_t boot_count = 0;
 
-char temp[4];
-char statistics[100];
+char temp[6];
+char humi[6];
+
+char statisticsPayload[100];
+char sensorPayload[100];
 
 /************************* Declaração dos Prototypes **************************/
 
@@ -50,7 +59,14 @@ void sendData();
 
 /************************* Instanciação dos objetos  **************************/
 
+#ifdef MCP9808_SENSOR
 Adafruit_MCP9808 mcp9808 = Adafruit_MCP9808();
+#else
+#define DHTPIN D5
+#define DHTTYPE DHT22
+DHT dht(DHTPIN, DHTTYPE);
+#endif
+
 WiFiClient client;
 PubSubClient mqtt(client);
 
@@ -91,16 +107,50 @@ void incrementBootCount() {
 
 void readSensor()
 {
+  float t, h = 0;
+
+#ifdef MCP9808_SENSOR
+
   //  mcp9808.shutdown_wake(0);
-  float c = mcp9808.readTempC();
-  dtostrf(c, 2, 2, temp);
+  t = mcp9808.readTempC();
+  dtostrf(t, 2, 2, temp);
+  dtostrf(h, 2, 2, humi);
+
   //  mcp9808.shutdown_wake(1);
+
+#else
+
+  t = dht.readTemperature();
+  h = dht.readHumidity();
+
+  if (isnan(t)) {
+    t = 0;
+  }
+
+  if (isnan(h)) {
+    h = 0;
+  }
+
+  dtostrf(t, 2, 2, temp);
+  dtostrf(h, 2, 2, humi);
+
+#endif
 }
 
 void sendData()
 {
-  mqtt.publish(MQTT_TOPIC_SENSOR, temp, true);
-  DEBUG_PRINTLN("[SENSOR] Temperatura: " + String(temp));
+
+  String payload;
+  payload += "{";
+  payload += "\"t\":";
+  payload += temp;
+  payload += ",\"h\":";
+  payload += humi;
+  payload += "}";
+
+  payload.toCharArray(sensorPayload, 100);
+  mqtt.publish(MQTT_TOPIC_SENSOR, sensorPayload);
+  DEBUG_PRINTLN("[SENSOR] Temperatura: " + String(sensorPayload));
 }
 
 /* Função responsável por publicar a cada X segundos o valor do sensor */
@@ -136,8 +186,8 @@ void statisticsLoop() {
 
     DEBUG_PRINTLN("[STATISTICS] " + payload);
 
-    payload.toCharArray(statistics, 100);
-    mqtt.publish(MQTT_TOPIC_STATISTICS, statistics);
+    payload.toCharArray(statisticsPayload, 100);
+    mqtt.publish(MQTT_TOPIC_STATISTICS, statisticsPayload);
   }
 }
 
@@ -178,10 +228,16 @@ void initMQTT() {
 
 /* Inicialização do Sensor */
 void initSensor() {
+
+#ifdef MCP9808_SENSOR
+
   if (!mcp9808.begin()) {
     DEBUG_PRINTLN("[SENSOR] MCP9808 não pode ser iniciado!");
     while (1);
   }
+
+#endif
+
 }
 
 /* Demais implementações */
