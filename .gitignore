@@ -1,3 +1,4 @@
 /node_modules
 .idea
-firmware/mqtt/user_config_override.h
+firmware/mqtt/v1/user_config_override.h
+firmware/mqtt/v2/user_config_override.h
