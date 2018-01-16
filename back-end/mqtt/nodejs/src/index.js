@@ -8,7 +8,7 @@ const mqttStatisticsTopic = 'douglaszuqueto/casa_01/cozinha/temperatura/sensor_0
 const db = knex({
   client: 'mysql',
   connection: {
-    host: '192.168.0.20',
+    host: '192.168.0.10',
     user: 'root',
     password: 'root',
     database: 'sensor'
