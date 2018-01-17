@@ -20,7 +20,7 @@
 
 /**************************** DEBUG *******************************/
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define DEBUG_PRINTLN(m) Serial.println(m)
@@ -36,14 +36,10 @@
 
 ADC_MODE(ADC_VCC);
 
-unsigned long sensorPreviousMillis      = 0;
-unsigned long statisticsPreviousMillis  = 0;
-
 char temp[6];
 char humi[6];
 
-char statisticsPayload[100];
-char sensorPayload[100];
+char sensorPayload[70];
 
 uint32_t sleep_time_s = 5 * 1000000;
 
@@ -73,16 +69,17 @@ PubSubClient mqtt(client);
 
 void setup() {
   initSerial();
-
   initWiFi();
   initMQTT();
   initSensor();
 
-  sensorLoop();
-  statisticsLoop();
+  if (mqtt.connected()) {
+    sensorLoop();
+  }
 
+  mqtt.disconnect();
+  delay(250);
   DEBUG_PRINTLN("Sleeping...");
-
   ESP.deepSleep(sleep_time_s);
 }
 
@@ -123,8 +120,13 @@ void readSensor()
 #endif
 }
 
-void sendData()
-{
+/* Função responsável por publicar a cada X segundos o valor do sensor */
+void sensorLoop() {
+  readSensor();
+  sendData();
+}
+
+void sendData() {
 
   String payload;
   payload += "{";
@@ -134,37 +136,18 @@ void sendData()
   payload += temp;
   payload += ",\"h\":";
   payload += humi;
-  payload += "}";
-
-  payload.toCharArray(sensorPayload, 100);
-  mqtt.publish(MQTT_TOPIC_SENSOR, sensorPayload);
-  DEBUG_PRINTLN("[SENSOR] " + String(sensorPayload));
-}
-
-/* Função responsável por publicar a cada X segundos o valor do sensor */
-void sensorLoop() {
-  readSensor();
-  sendData();
-}
-
-void statisticsLoop() {
-
-  String payload;
-  payload += "{";
-  payload += "\"id\":";
-  payload += ESP.getChipId();
-  payload += ",\"vcc\":";
+  payload += ",\"v\":";
   payload += ESP.getVcc() / 1024.00f;
-  payload += ",\"memory\":";
+  payload += ",\"m\":";
   payload += ESP.getFreeHeap();
-  payload += ",\"uptime\":";
+  payload += ",\"u\":";
   payload += millis();
   payload += "}";
 
-  DEBUG_PRINTLN("[STATISTICS] " + payload);
+  payload.toCharArray(sensorPayload, 70);
+  mqtt.publish(MQTT_TOPIC_SENSOR, sensorPayload);
 
-  payload.toCharArray(statisticsPayload, 100);
-  mqtt.publish(MQTT_TOPIC_STATISTICS, statisticsPayload);
+  DEBUG_PRINTLN("[SENSOR] " + payload);
 }
 
 /* Conexao Serial */
@@ -206,7 +189,7 @@ void initMQTT() {
     DEBUG_PRINTLN(BROKER_MQTT);
 
     while (!mqtt.connected()) {
-      if (mqtt.connect("sensor_01", "douglaszuqueto/casa_01/cozinha/temperatura/sensor_01/offline", 0, false, "offline")) {
+      if (mqtt.connect("sensor_01")) {
         DEBUG_PRINTLN("");
         DEBUG_PRINTLN(F("[BROKER] Conectado"));
       } else {

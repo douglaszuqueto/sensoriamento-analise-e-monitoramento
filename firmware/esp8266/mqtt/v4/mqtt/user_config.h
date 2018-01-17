@@ -16,7 +16,6 @@ const char* BROKER_MQTT = "192.168.0.10";
 int BROKER_PORT         = 1883;
 
 const char* MQTT_TOPIC_SENSOR     = "douglaszuqueto/casa_01/cozinha/temperatura/sensor_01";
-const char* MQTT_TOPIC_STATISTICS = "douglaszuqueto/casa_01/cozinha/temperatura/sensor_01/statistics";
 
 /* Intervals */
 
