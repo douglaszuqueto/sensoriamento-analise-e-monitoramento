@@ -41,7 +41,7 @@ char humi[6];
 
 char sensorPayload[70];
 
-uint32_t sleep_time_s = 5 * 1000000;
+uint32_t sleep_time = 5 * 1000000;
 
 /************************* Declaração dos Prototypes **************************/
 
@@ -65,28 +65,73 @@ DHT dht(DHTPIN, DHTTYPE);
 WiFiClient client;
 PubSubClient mqtt(client);
 
-/********************************** Sketch ************************************/
+/*********************** Implementação dos Prototypes *************************/
 
-void setup() {
-  initSerial();
-  initWiFi();
-  initMQTT();
-  initSensor();
+void initSerial() {
+#ifdef DEBUG
+  Serial.begin(115200);
+#endif
+}
 
-  if (mqtt.connected()) {
-    sensorLoop();
+void initWiFi() {
+  delay(10);
+  DEBUG_PRINT("[WIFI] Conectando-se em " + String(WIFI_SSID));
+
+  WiFi.config(ip, gw, subnet);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    DEBUG_PRINT(".");
   }
 
-  mqtt.disconnect();
-  delay(250);
-  DEBUG_PRINTLN("Sleeping...");
-  ESP.deepSleep(sleep_time_s);
+  DEBUG_PRINTLN("");
+  DEBUG_PRINT(F("[WIFI] SSID: "));
+  DEBUG_PRINTLN(WIFI_SSID);
+  DEBUG_PRINT(F("[WIFI] IP: "));
+  DEBUG_PRINTLN(WiFi.localIP());
+  DEBUG_PRINT(F("[WIFI] Mac: "));
+  DEBUG_PRINTLN(WiFi.macAddress());
+  DEBUG_PRINTLN("");
 }
 
-void loop() {
+void initMQTT() {
+  mqtt.setServer(BROKER_MQTT, BROKER_PORT);
+
+  if (!mqtt.connected()) {
+    DEBUG_PRINT(F("[BROKER] Tentando se conectar ao Broker MQTT: "));
+    DEBUG_PRINTLN(BROKER_MQTT);
+
+    while (!mqtt.connected()) {
+      if (mqtt.connect("sensor_01")) {
+        DEBUG_PRINTLN("");
+        DEBUG_PRINTLN(F("[BROKER] Conectado"));
+      } else {
+        DEBUG_PRINT(".");
+        delay(500);
+      }
+    }
+  }
+
+  DEBUG_PRINTLN("");
 }
 
-/*********************** Implementação dos Prototypes *************************/
+void initSensor() {
+
+#ifdef MCP9808_SENSOR
+
+  if (!mcp9808.begin()) {
+    DEBUG_PRINTLN("[SENSOR] MCP9808 não pode ser iniciado!");
+    while (1);
+  }
+
+#else
+
+  dht.begin();
+
+#endif
+
+}
 
 void readSensor()
 {
@@ -120,7 +165,6 @@ void readSensor()
 #endif
 }
 
-/* Função responsável por publicar a cada X segundos o valor do sensor */
 void sensorLoop() {
   readSensor();
   sendData();
@@ -150,73 +194,23 @@ void sendData() {
   DEBUG_PRINTLN("[SENSOR] " + payload);
 }
 
-/* Conexao Serial */
-void initSerial() {
-#ifdef DEBUG
-  Serial.begin(115200);
-#endif
-}
+/********************************** Sketch ************************************/
 
-/* Configuração da conexão WiFi */
-void initWiFi() {
-  delay(10);
-  DEBUG_PRINT("[WIFI] Conectando-se em " + String(WIFI_SSID));
+void setup() {
+  initSerial();
+  initWiFi();
+  initMQTT();
+  initSensor();
 
-  WiFi.config(ip, gw, subnet);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    DEBUG_PRINT(".");
+  if (mqtt.connected()) {
+    sensorLoop();
   }
 
-  DEBUG_PRINTLN("");
-  DEBUG_PRINT(F("[WIFI] SSID: "));
-  DEBUG_PRINTLN(WIFI_SSID);
-  DEBUG_PRINT(F("[WIFI] IP: "));
-  DEBUG_PRINTLN(WiFi.localIP());
-  DEBUG_PRINT(F("[WIFI] Mac: "));
-  DEBUG_PRINTLN(WiFi.macAddress());
-  DEBUG_PRINTLN("");
+  mqtt.disconnect();
+  delay(250);
+  DEBUG_PRINTLN("Sleeping...");
+  ESP.deepSleep(sleep_time);
 }
 
-/* Configuração da conexão MQTT */
-void initMQTT() {
-  mqtt.setServer(BROKER_MQTT, BROKER_PORT);
-
-  if (!mqtt.connected()) {
-    DEBUG_PRINT(F("[BROKER] Tentando se conectar ao Broker MQTT: "));
-    DEBUG_PRINTLN(BROKER_MQTT);
-
-    while (!mqtt.connected()) {
-      if (mqtt.connect("sensor_01")) {
-        DEBUG_PRINTLN("");
-        DEBUG_PRINTLN(F("[BROKER] Conectado"));
-      } else {
-        DEBUG_PRINT(".");
-        delay(500);
-      }
-    }
-  }
-
-  DEBUG_PRINTLN("");
+void loop() {
 }
-
-/* Inicialização do Sensor */
-void initSensor() {
-
-#ifdef MCP9808_SENSOR
-
-  if (!mcp9808.begin()) {
-    DEBUG_PRINTLN("[SENSOR] MCP9808 não pode ser iniciado!");
-    while (1);
-  }
-
-#else
-
-  dht.begin();
-
-#endif
-
-}
-
