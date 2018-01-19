@@ -20,8 +20,6 @@
 
 /**************************** DEBUG *******************************/
 
-//#define DEBUG
-
 #ifdef DEBUG
 #define DEBUG_PRINTLN(m) Serial.println(m)
 #define DEBUG_PRINT(m) Serial.print(m)
@@ -41,7 +39,7 @@ char humi[6];
 
 char sensorPayload[70];
 
-uint32_t sleep_time = 5 * 1000000;
+uint32_t sleep_time = 60 * 1000000; // intervalo de 1 minuto
 
 /************************* Declaração dos Prototypes **************************/
 
