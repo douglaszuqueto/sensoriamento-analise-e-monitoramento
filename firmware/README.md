@@ -2,15 +2,12 @@
 
 ## Introdução
 
-[Sensoriamento Real Time com MQTT e Websockets](https://douglaszuqueto.com/artigos/sensoriamento-real-time-com-mqtt-e-websockets
-)
+## Materiais utilizados
 
-## Testando o firmware
+## Versões desenvolvidas
 
-mosquitto_sub -t douglaszuqueto/casa_01/cozinha/sensor_01
+### HTTP
 
-## Referências
+### MQTT
 
-[Sensoriamento Real Time com MQTT e Websockets](https://douglaszuqueto.com/artigos/sensoriamento-real-time-com-mqtt-e-websockets
-)
-
+## Diagrama de funcionamento
