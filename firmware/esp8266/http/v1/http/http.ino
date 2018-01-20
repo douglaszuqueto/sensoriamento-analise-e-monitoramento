@@ -70,6 +70,7 @@ void initSerial() {
 
 void initWiFi() {
   delay(10);
+  DEBUG_PRINTLN("");
   DEBUG_PRINT("[WIFI] Conectando-se em " + String(WIFI_SSID));
 
   WiFi.config(ip, gw, subnet);
@@ -178,8 +179,10 @@ void sendData() {
   String response =  http.getString();
   http.end();
 
-  DEBUG_PRINTLN("[SENSOR] " + payload);
-  DEBUG_PRINTLN("[SENSOR] " + response);
+  DEBUG_PRINTLN("[SENSOR] Payload " + payload);
+  DEBUG_PRINTLN("[HTTP] Response " + response);
+  DEBUG_PRINTLN("[HTTP] Lenght " + response.length);
+  DEBUG_PRINTLN("[HTTP] Code: " + httpCode)
 }
 
 /********************************** Sketch ************************************/
