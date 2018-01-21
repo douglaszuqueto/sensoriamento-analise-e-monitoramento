@@ -73,6 +73,7 @@ void initSerial() {
 
 void initWiFi() {
   delay(10);
+  DEBUG_PRINTLN("");
   DEBUG_PRINT("[WIFI] Conectando-se em " + String(WIFI_SSID));
 
   WiFi.config(ip, gw, subnet);
