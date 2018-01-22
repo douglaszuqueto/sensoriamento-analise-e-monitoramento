@@ -45,11 +45,13 @@ func (h *SensorHandler)  CreateSensor(w http.ResponseWriter, r *http.Request){
 	json.NewDecoder(r.Body).Decode(&request)
 
 	sensor := Sensor{
-		ChipID: request.Id, 
-		Name: "Sensor 01", 
-		Alias: "Sensor 01", 
-		Temperature: request.Temperature, 
+		ChipID: request.Id,
+		Name: "Sensor 01",
+		Alias: "Sensor 01",
+		Temperature: request.Temperature,
 		Moisture: request.Humidify}
+
+  fmt.Println(request)
 
 	model.Create(&sensor)
 

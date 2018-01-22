@@ -7,6 +7,6 @@ import (
 
 func main() {
 	fmt.Println("Sensoriamento - API")
-	
-	http.ListenAndServe(":8080", routes())
+
+	http.ListenAndServe(":8081", routes())
 }
