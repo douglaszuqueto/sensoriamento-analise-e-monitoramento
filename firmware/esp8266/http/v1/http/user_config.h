@@ -12,7 +12,7 @@ IPAddress subnet(255, 255, 255, 0);
 
 /* HTTP */
 
-const char* API_URL = "http://192.168.0.20:8080/";
+const char* API_URL = "http://192.168.0.10:8080/";
 
 /* SENSOR */
 

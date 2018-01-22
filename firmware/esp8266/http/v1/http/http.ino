@@ -37,7 +37,7 @@ ADC_MODE(ADC_VCC);
 char temp[6];
 char humi[6];
 
-uint32_t sleep_time = 2 * 1000000; // intervalo de 1 minuto
+uint32_t sleep_time = 60 * 1000000; // intervalo de 1 minuto
 
 /************************* Declaração dos Prototypes **************************/
 
