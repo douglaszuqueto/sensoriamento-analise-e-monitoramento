@@ -17,3 +17,5 @@
 ### HTTP
 
 ### MQTT
+
+## Referências
