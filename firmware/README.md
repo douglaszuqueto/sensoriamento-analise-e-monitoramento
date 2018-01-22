@@ -4,10 +4,18 @@
 
 ## Materiais utilizados
 
+## Esquemático
+
+### Teste
+
+### Produção*
+
+## Diagrama de funcionamento
+
 ## Versões desenvolvidas
 
 ### HTTP
 
 ### MQTT
 
-## Diagrama de funcionamento
+## Referências
