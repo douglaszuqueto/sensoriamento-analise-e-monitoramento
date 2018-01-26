@@ -180,9 +180,11 @@ void sendData() {
   http.end();
 
   DEBUG_PRINTLN("[SENSOR] Payload " + payload);
+  DEBUG_PRINTLN("[SENSOR] Length " + String(payload.length()));
+
   DEBUG_PRINTLN("[HTTP] Response " + response);
-  DEBUG_PRINTLN("[HTTP] Lenght " + response.length);
-  DEBUG_PRINTLN("[HTTP] Code: " + httpCode)
+  DEBUG_PRINTLN("[HTTP] Length: " + String(response.length()));
+  DEBUG_PRINTLN("[HTTP] Code: " + String(httpCode));
 }
 
 /********************************** Sketch ************************************/
@@ -194,7 +196,7 @@ void setup() {
 
   sensorLoop();
 
-//  delay(250);
+  //  delay(250);
   DEBUG_PRINTLN("Sleeping...");
   ESP.deepSleep(sleep_time);
 }
